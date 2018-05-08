@@ -7,11 +7,13 @@ node version 6.x 以上
 安装
 -----
 使用npm安装
+
 ```
 npm init
 npm install --save react react-dom
 ```
 使用yarn安装
+
 ```
 yarn init
 yarn add react react-dom
@@ -80,12 +82,14 @@ React DOM 首先会比较元素内容先后的不同，而在渲染过程中只�
 函数定义/类定义组件
 -----
 使用JavaScript函数：
+
 ```JavaScript
 function Welcome(props) {
   return <h1>Hello, {props.name}</h1>;
 }
 ```
 使用 ES6 class 来定义一个组件:
+
 ```JavaScript
 class Welcome extends React.Component {
   render() {
@@ -94,6 +98,7 @@ class Welcome extends React.Component {
 }
 ```
 当React遇到的元素是用户自定义的组件，它会将JSX属性作为单个对象传递给该组件，这个对象称之为“props”。
+
 ```JavaScript
 function Welcome(props) {
   return <h1>Hello, {props.name}.</h1>;
@@ -107,9 +112,12 @@ ReactDOM.render(
 我们来回顾一下在这个例子中发生了什么：
 
 我们对<Welcome name="Sara" />元素调用了ReactDOM.render()方法。
+
 React将{name: 'Sara'}作为props传入并调用Welcome组件。
-Welcome组件将<h1>Hello, Sara</h1>元素作为结果返回。
-React DOM将DOM更新为<h1>Hello, Sara</h1>。
+
+Welcome组件将`<h1>Hello, Sara</h1>`元素作为结果返回。
+
+React DOM将DOM更新为`<h1>Hello, Sara</h1>`。
 
 >#####警告：
 
@@ -121,6 +129,7 @@ React DOM将DOM更新为<h1>Hello, Sara</h1>。
 组件可以在它的输出中引用其它组件，这就可以让我们用同一组件来抽象出任意层次的细节。在React应用中，按钮、表单、对话框、整个屏幕的内容等，这些通常都被表示为组件。
 
 例如，我们可以创建一个App组件，用来多次渲染Welcome组件：
+
 ```JavaScript
 function Welcome(props) {
   return <h1>Hello, {props.name}</h1>;
@@ -152,6 +161,7 @@ ReactDOM.render(
 Props的只读性
 无论是使用函数或是类来声明一个组件，它决不能修改它自己的props。
 来看这个sum函数：
+
 ```JavaScript
 function sum(a, b) {
   return a + b;
@@ -160,6 +170,7 @@ function sum(a, b) {
 类似于上面的这种函数称为“纯函数”，它没有改变它自己的输入值，当传入的值相同时，总是会返回相同的结果。
 
 与之相对的是非纯函数，它会改变它自身的输入值：
+
 ```JavaScript
 function withdraw(account, amount) {
   account.total -= amount;
@@ -168,3 +179,5 @@ function withdraw(account, amount) {
 React是非常灵活的，但它也有一个严格的规则：
 
 **所有的React组件必须像纯函数那样使用它们的props**
+
+
