@@ -221,6 +221,7 @@ ReactDOM.render(
 我们之前提到过，定义为类的组件有一些特性。局部状态就是如此：一个功能只适用于类。
 
 **将函数转换为类**
+
 你可以通过5个步骤将函数组件 `Clock` 转换为类
 
 1. 创建一个名称扩展为 `React.Component` 的ES6 类
@@ -250,6 +251,7 @@ class Clock extends React.Component {
 使用类就允许我们使用其它特性，例如局部状态、生命周期钩子
 
 **为一个类添加局部状态**
+
 我们会通过3个步骤将 `date` 从属性移动到状态中：
 
 1. 在 `render()` 方法中使用 `this.state.date` 替代 `this.props.date`
@@ -331,6 +333,7 @@ ReactDOM.render(
 ```
 
 **将生命周期方法添加到类中**
+
 在具有许多组件的应用程序中，在销毁时释放组件所占用的资源非常重要。
 
 每当 `Clock` 组件第一次加载到DOM中的时候，我们都想生成定时器，这在React中被称为`挂载`
@@ -442,9 +445,11 @@ ReactDOM.render(
 5. 一旦`Clock`组件被从DOM中移除，React会调用`componentWillUnmount()`这个钩子函数，定时器也就会被清除。
 
 **正确地使用状态**
+
 关于 `setState()` 这里有三件事情需要知道
 
 **1. 不要直接更新状态**
+
 例如，此代码不会重新渲染组件：
 
 ```JavaScript
@@ -461,6 +466,7 @@ this.setState({comment: 'Hello'});
 构造函数是唯一能够初始化 `this.state` 的地方。
 
 **2. 状态更新可能是异步的**
+
 React 可以将多个`setState()` 调用合并成一个调用来提高性能。
 
 因为 `this.props` 和 `this.state` 可能是异步更新的，你不应该依靠它们的值来计算下一个状态。
@@ -492,6 +498,7 @@ this.setState(function(prevState, props) {
 });
 ```
 **3. 状态更新合并**
+
 当你调用 setState() 时，React 将你提供的对象合并到当前状态。
 
 例如，你的状态可能包含一些独立的变量：
@@ -525,6 +532,7 @@ componentDidMount() {
 这里的合并是浅合并，也就是说`this.setState({comments})`完整保留了`this.state.posts`，但完全替换了`this.state.comments`。
 
 **组件生命周期**
+
 每一个组件都有几个你可以重写以让代码在处理环节的特定时期运行的“生命周期方法”。方法中带有前缀 **will** 的在特定环节之前被调用，而带有前缀 **did** 的方法则会在特定环节之后被调用。
 
 装配
@@ -614,6 +622,7 @@ static getDerivedStateFromProps(nextProps, prevState)
 调用`this.setState()` 通常不会触发 `getDerivedStateFromProps()`。
 
 **getSnapshotBeforeUpdate()**
+
 `getSnapshotBeforeUpdate()`在最新的渲染输出提交给DOM前将会立即调用。它让你的组件能在当前的值可能要改变前获得它们。这一生命周期返回的任何值将会 作为参数被传递给`componentDidUpdate()`。
 
 ```JavaScript
@@ -638,7 +647,203 @@ componentDidUpdate(prevProps, prevState, snapshot) {
 
 在上面的例子中，为了支持异步渲染，在`getSnapshotBeforeUpdate` 中读取`scrollHeight`而不是`componentWillUpdate`，这点很重要。由于异步渲染，在“渲染”时期（如`componentWillUpdate`和`render`）和“提交”时期（如`getSnapshotBeforeUpdate`和`componentDidUpdate`）间可能会存在延迟。如果一个用户在这期间做了像改变浏览器尺寸的事，从`componentWillUpdate`中读出的`scrollHeight`值将是滞后的。
 
+事件处理
+-----
+React 元素的事件处理和 DOM元素的很相似。但是有一点语法上的不同:
+
+React事件绑定属性的命名采用驼峰式写法，而不是小写。
+如果采用 JSX 的语法你需要传入一个函数作为事件处理函数，而不是一个字符串(DOM元素的写法)
+
+例如，传统的 HTML：
+
+```javascript
+<button onclick="activateLasers()">
+  Activate Lasers
+</button>
+```
+React 中稍稍有点不同：
+
+```javascript
+<button onClick={this.activateLasers.bind(this)}>
+  Activate Lasers
+</button>
+```
+你必须谨慎对待 JSX 回调函数中的 this，类的方法默认是不会绑定 this 的。如果你忘记绑定 this.handleClick 并把它传入 onClick, 当你调用这个函数的时候 this 的值会是 undefined。
+
+这并不是 React 的特殊行为；它是函数如何在 JavaScript 中运行的一部分。通常情况下，如果你没有在方法后面添加 () ，例如 onClick={this.handleClick}，你应该为这个方法绑定 this。
+
+如果使用 bind 让你很烦，这里有两种方式可以解决。如果你正在使用实验性的属性初始化器语法，你可以使用属性初始化器来正确的绑定回调函数：
+
+```javascript
+//1
+class LoggingButton extends React.Component {
+  constructor() {
+  	this.handleClick = this.handleClick.bind(this)
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick}>
+        Click me
+      </button>
+    );
+  }
+}
+
+//2
+class LoggingButton extends React.Component {
+  // This syntax ensures `this` is bound within handleClick.
+  // Warning: this is *experimental* syntax.
+  handleClick = () => {
+    console.log('this is:', this);
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick}>
+        Click me
+      </button>
+    );
+  }
+}
+
+//3
+class LoggingButton extends React.Component {
+  handleClick() {
+    console.log('this is:', this);
+  }
+
+  render() {
+    // This syntax ensures `this` is bound within handleClick
+    return (
+      <button onClick={(e) => this.handleClick(e)}>
+        Click me
+      </button>
+    );
+  }
+}
+```
+
+使用这个语法有个问题就是每次 `LoggingButton` 渲染的时候都会创建一个不同的回调函数。在大多数情况下，这没有问题。然而如果这个回调函数作为一个属性值传入低阶组件，这些组件可能会进行额外的重新渲染。我们通常建议在构造函数中绑定或使用属性初始化器语法来避免这类性能问题。
+
+向事件处理程序传递参数
+-----
+通常我们会为事件处理程序传递额外的参数。例如，若是 id 是你要删除那一行的 id，以下两种方式都可以向事件处理程序传递参数：
+
+```javascript
+<button onClick={(e) => this.deleteRow(id, e)}>Delete Row</button>
+<button onClick={this.deleteRow.bind(this, id)}>Delete Row</button>
+```
+上述两种方式是等价的，分别通过 arrow functions 和 Function.prototype.bind 来为事件处理函数传递参数。
+
+上面两个例子中，参数 e 作为 React 事件对象将会被作为第二个参数进行传递。通过箭头函数的方式，事件对象必须显式的进行传递，但是通过 bind 的方式，事件对象以及更多的参数将会被隐式的进行传递。
+
+值得注意的是，通过 bind 方式向监听函数传参，在类组件中定义的监听函数，事件对象 e 要排在所传递参数的后面
+```javascript
+deleteRow(id,e){
+  e.preventDefault()
+}
+```
+
+条件渲染
+-----
+在 React 中，你可以创建不同的组件来封装各种你需要的行为。然后还可以根据应用的状态变化只渲染其中的一部分。
+
+```javascript
+function UserGreeting(props) {
+  return <h1>Welcome back!</h1>;
+}
+
+function GuestGreeting(props) {
+  return <h1>Please sign up.</h1>;
+}
+
+function Greeting(props) {
+  const isLoggedIn = props.isLoggedIn;
+  if (isLoggedIn) {
+    return <UserGreeting />;
+  }
+  return <GuestGreeting />;
+}
+
+ReactDOM.render(
+  // Try changing to isLoggedIn={true}:
+  <Greeting isLoggedIn={false} />,
+  document.getElementById('root')
+);
+
+ReactDOM.render(
+  {
+    this.state.isLoggedIn && <UserGreeting />,
+  }
+  document.getElementById('root')
+);
+
+ReactDOM.render(
+  {
+    this.state.isLoggedIn ? <UserGreeting /> : <GuestGreeting />,
+  }
+  document.getElementById('root')
+);
+```
+
+列表 & Keys
+-----
+Javascript中如何转化列表
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+const doubled = numbers.map((number) => number * 2);
+console.log(doubled);
+//代码打印出[2, 4, 6, 8, 10]
+```
+我们使用Javascript中的map()方法遍历numbers数组。对数组中的每个元素返回<li>标签
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+const listItems = numbers.map((number) =>
+  <li>{number}</li>
+);
+
+ReactDOM.render(
+  <ul>{listItems}</ul>,
+  document.getElementById('root')
+);
+//这段代码生成了一个1到5的数字列表
+```
+
+当我们运行这段代码，将会看到一个警告 a key should be provided for list items ，意思是当你创建一个元素时，必须包括一个特殊的 key 属性。
+
+让我们来给每个列表元素分配一个 key 来解决上面的那个警告
+
+```javascript
+function NumberList(props) {
+  const numbers = props.numbers;
+  const listItems = numbers.map((number) =>
+    <li key={number.toString()}>
+      {number}
+    </li>
+  );
+  return (
+    <ul>{listItems}</ul>
+  );
+}
+
+const numbers = [1, 2, 3, 4, 5];
+ReactDOM.render(
+  <NumberList numbers={numbers} />,
+  document.getElementById('root')
+);
+```
+
++ 一个元素的key最好是这个元素在列表中拥有的一个独一无二的字符串。通常，我们使用来自数据的id作为元素的key
++ 当元素没有确定的id时，你可以使用他的序列号索引index作为key
++ 如果列表可以重新排序，我们不建议使用索引来进行排序，因为这会导致渲染变得很慢。
+
 react diff dom参考文献：
+
 [React diff机制（比较虚拟DOM的机制）](https://www.jianshu.com/p/1da5c91f5e5d)
+
 [深入理解react中的虚拟DOM、diff算法](http://www.cnblogs.com/zhuzhenwei918/p/7271305.html)
+
 [深度剖析：如何实现一个 Virtual DOM 算法](https://github.com/livoras/blog/issues/13)
