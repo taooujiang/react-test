@@ -15,86 +15,117 @@ import ReactDOM from 'react-dom';
 //
 // setInterval(tick, 1000);
 
-class Welcome extends React.Component {
-  constructor(props){
-    super(props)
-    this.state = {
-      name: "",
-      age: 0
-    }
-  }
+// class Welcome extends React.Component {
+//   constructor(props){
+//     super(props)
+//     this.state = {
+//       name: "",
+//       age: 0
+//     }
+//   }
+//
+//   tick() {
+//     this.setState(function(prevState, props){
+//       return {age: ++prevState.age}
+//     })
+//   }
+//
+//   static getDerivedStateFromProps(nextProps, prevState){
+//     console.log("getDerivedStateFromProps")
+//     console.log(nextProps,prevState)
+//     return {age: 10}
+//   }
+//
+//   componentWillMount() {
+//     console.log("componentWillMount")
+//     this.timerID = setInterval(
+//       () => this.tick(),
+//       1000
+//     )
+//   }
+//
+//   componentDidMount() {
+//     console.log("componentDidMount")
+//   }
+//
+//   componentWillReceiveProps() {
+//     console.log("componentWillReceiveProps")
+//   }
+//
+//   shouldComponentUpdate() {
+//     console.log("shouldComponentUpdate")
+//     return true
+//   }
+//
+//   componentWillUpdate() {
+//     console.log("componentWillUpdate")
+//   }
+//
+//   getSnapshotBeforeUpdate(prevProps, prevState) {
+//     console.log("getSnapshotBeforeUpdate")
+//     console.log(prevProps, prevState)
+//     return {hello:"hello"}
+//   }
+//
+//   componentDidUpdate(prevProps, prevState, snapshot) {
+//     console.log("componentDidUpdate")
+//     if(snapshot != null){
+//       console.log(snapshot)
+//     }
+//   }
+//
+//   componentWillUnmount() {
+//     console.log("componentWillUnmount")
+//   }
+//
+//   render(){
+//     console.log("render")
+//     console.log(this.state)
+//     return <h1>Hello, {this.props.name}.</h1>;
+//   }
+//
+// }
+//
+// let age = 18
+// let timer = setInterval(function(){
+//   ++age
+//   const element = <Welcome name="Sara" age={age} />;
+//   ReactDOM.render(
+//     element,
+//     document.getElementById('root')
+//   );
+//   if(age>=20) {
+//     clearInterval(timer)
+//   }
+// },1000)
 
-  tick() {
-    this.setState(function(prevState, props){
-      return {age: ++prevState.age}
-    })
-  }
 
-  static getDerivedStateFromProps(nextProps, prevState){
-    console.log("getDerivedStateFromProps")
-    console.log(nextProps,prevState)
-    return {age: 10}
-  }
+const ThemeContext = React.createContext('light');
 
-  componentWillMount() {
-    console.log("componentWillMount")
-    this.timerID = setInterval(
-      () => this.tick(),
-      1000
-    )
-  }
-
-  componentDidMount() {
-    console.log("componentDidMount")
-  }
-
-  componentWillReceiveProps() {
-    console.log("componentWillReceiveProps")
-  }
-
-  shouldComponentUpdate() {
-    console.log("shouldComponentUpdate")
-    return true
-  }
-
-  componentWillUpdate() {
-    console.log("componentWillUpdate")
-  }
-
-  getSnapshotBeforeUpdate(prevProps, prevState) {
-    console.log("getSnapshotBeforeUpdate")
-    console.log(prevProps, prevState)
-    return {hello:"hello"}
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log("componentDidUpdate")
-    if(snapshot != null){
-      console.log(snapshot)
-    }
-  }
-
-  componentWillUnmount() {
-    console.log("componentWillUnmount")
-  }
-
-  render(){
-    console.log("render")
-    console.log(this.state)
-    return <h1>Hello, {this.props.name}.</h1>;
-  }
-
+function ThemedButton(props) {
+  // ThemedButton 组件从 context 接收 theme
+  console.log(props)
+  return (
+    <ThemeContext.Consumer>
+      {theme => <button {...props} theme={theme.color} value={theme.name}>{theme.name}</button>}
+    </ThemeContext.Consumer>
+  );
 }
 
-let age = 18
-let timer = setInterval(function(){
-  ++age
-  const element = <Welcome name="Sara" age={age} />;
-  ReactDOM.render(
-    element,
-    document.getElementById('root')
+// 中间组件
+function Toolbar(props) {
+  return (
+    <div>
+      <ThemedButton {...props} />
+    </div>
   );
-  if(age>=20) {
-    clearInterval(timer)
-  }
-},1000)
+}
+
+ReactDOM.render(
+  (
+    <ThemeContext.Provider value={{color:"dark1", name:"button"}}>
+      <Toolbar style={{backgroundColor:"red"}} />
+    </ThemeContext.Provider>
+  ),
+  document.getElementById('root')
+);
